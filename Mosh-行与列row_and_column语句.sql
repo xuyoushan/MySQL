@@ -1,0 +1,118 @@
+-- 插入单行
+-- insert into customers
+-- value (
+--     default,  -- customer_id，自动递增，务必使用默认值
+--     'John',
+--     'Smith',
+--     '1990-01-01',  -- 出生日期，使用默认值default或null或自行设置数值
+--     null,  -- 电话号码，使用默认值default或null或自行设置数值
+--     'address',
+--     'city',
+--     'CA',
+--     default)  -- 客户积分，默认值0
+-- --------------------------------
+-- insert into customers (
+--     first_name,  -- 在此处列出需要添加行的列，
+--     birth_date,  -- 未列出的列名，默认使用默认值
+--     last_name,   -- 可随意交换列名
+--     address,
+--     city,
+--     state)
+-- value (
+--     'John',  -- 即可直接进行添加
+--     '1990-01-01',
+--     'Smith',  -- 交换的列名在这里进行交换值即可
+--     'address',
+--     'city',
+--     'CA')
+
+-- 插入多行
+-- insert into shippers (name)
+-- values ('Shipper1'),
+--        ('Shipper2'),
+--        ('Shipper3')
+
+-- Exercise
+-- insert into products (name, quantity_in_stock, unit_price)
+-- values ('product1', 19, 1.95),
+--        ('product2', 20, 2.95),
+--        ('product3', 30, 3.95)
+
+-- 插入分层行  -- 同时联动多个表
+-- insert into orders (customer_id, order_date,status)
+-- values (1, '2019-01-02', 1)
+-- insert into order_items
+-- values 
+--     (last_insert_id(), 1, 1, 2.95),  -- 在另一个表中对在orders表中插入的order_id进行添加
+--     (last_insert_id(), 2, 1, 3.95)
+-- select last_insert_id()  -- 字面意思，用来查询最后插入的id数值
+
+-- 创建表复制
+-- create table orders_archived as  -- 创建一个新的表
+-- select * from ordersorders_archived  -- 新表的数据完全复制其他表，但不会保留PK、AI功能
+-- -------------------------------------------------
+-- insert into orders_archived  左侧窗口右击表名，选择Truncate Table，完全删除表中数据
+-- select *
+-- from orders
+-- where order_date < '2019-01-01'  -- 选择满足条件的值进行插入
+
+-- Exercise
+-- create table invoices_archived as
+-- select invoice_id, number, clients.name as client, payment_total, invoice_date, due_date, payment_date
+-- from invoices
+-- join clients
+--     on invoices.client_id = clients.client_id
+-- where payment_date is not null
+
+-- 更新单行
+-- update invoices
+-- set payment_total = default, payment_date = null  -- 可以使用默认值，也可以自行设置数值
+-- where invoice_id = 1
+-- ------------------------------------------------------------------------------------------------
+-- update invoices
+-- set 
+--     payment_total = invoice_total * 0.5, 
+--     payment_date = due_date  -- 将还款日期设置为和截止日期列相同的值
+-- where invoice_id = 3
+
+-- 更新多行
+-- update invoices
+-- set
+--     payment_total = invoice_total * 0.5,
+--     payment_date = due_date
+-- where client_id = 3
+
+-- Exercise
+-- update customers
+-- set points = points + 50
+-- where birth_date < '1990-01-01'
+
+-- 在updates中使用子查询
+-- update invoices
+-- set
+--     payment_total = invoice_total * 0.5,
+--     payment_date = due_date
+-- where client_id =   -- 此处使用select，可以单独对符合条件的对象进行修改
+--             (select client_id
+--             from clients
+--             where name = 'Myworks')  -- 如果返回多条记录，例如where state in ('CA', 'NY')，则
+-- ----------------------------------------------------------------------------------------------------
+-- where client_id in  -- 则要在此处加上in
+--             (select client_id
+--             from clients
+--             where state in ('CA', 'NY'))
+
+-- Excrise
+-- update orders
+-- set comments = 'Gold customer'
+-- where customer_id in
+--             (select customer_id
+--             from customers
+--             where points > 3000)
+ 
+ -- 删除行
+--  delete from invoices  -- 如果只运行这一行，会删除表中所有数据
+--  where client_id = (  -- 这里也可以使用where client_id = 1直接进行查找
+--     select *
+--     from clients
+--     where name = 'Myworks')
