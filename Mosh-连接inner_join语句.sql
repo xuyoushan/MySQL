@@ -1,0 +1,231 @@
+-- select order_id, o.customer_id, first_name, last_name
+-- 在第一行中，想要显示customer_id，需要指定表orders或customers，否则会报错
+-- from orders o  -- 弄个别名，减少代码量
+-- join customers c  -- 内连接，inner join，可以省略inner
+-- 	on o.customer_id = c.customer_id
+-- 内连接的作用：
+-- 当不同的表进行连接，通过几个表中的相同列进行查询，或取更多的信息
+
+-- Exercise
+-- select p.product_id, name, quantity, oi.unit_price
+-- from order_items oi
+-- join products p
+-- 	on oi.product_id = p.product_id
+
+-- select *
+-- from order_items oi
+-- 跨数据库连接
+-- 假设sql_store里没有products表，然后去连接sql_inventory数据库
+-- join sql_inventory.products p  -- 在表名前加上数据库名的前缀即可
+-- 	on oi.product_id = p.product_id
+
+-- 使用自连接查询每个员工及其直接上级的信息
+-- use sql_hr;
+-- select 
+-- 	e.employee_id,
+-- 	e.first_name,
+--     m.first_name as manger
+-- from employees e
+-- join employees m
+-- 	on e.reports_to = m.employee_id
+
+-- 使用两个join同时连接三个表
+-- select 
+-- 	o.order_id,
+--     o.order_date,
+--     c.first_name,
+--     c.last_name,
+--     os.name status
+-- from orders o
+-- join customers c
+-- 	on o.customer_id = c.customer_id
+-- join order_statuses os
+-- 	on o.status = os.order_status_id
+-- order by order_id
+
+-- Exercise
+-- select 
+-- 	p.amount,
+--     p.invoice_id,
+--     p.date,
+--     c.name,
+--     pm.name payment_method
+-- from payments p
+-- join clients c
+-- 	on p.client_id = c.client_id
+-- join payment_methods pm
+-- 	on p.payment_method = pm.payment_method_id
+
+-- 复合连接条件。当同一个订单包含多个产品时，
+-- 候通过and对order_id和product_id进行复合连接，
+-- 来进行唯一的确定
+-- select *
+-- from order_items oi
+-- join order_item_notes oin
+-- 	on oi.order_id = oin.order_Id
+--     and oi.product_id = oin.product_id
+
+-- select *
+-- from orders o
+-- join customers c
+-- 	on o.customer_id = c.customer_id
+-- -----------------------------------------------------------
+-- Implpicit Join Syntax  隐式连接语法
+-- select *   -- 等同于显示语法，但不建议使用
+-- from orders o, customers c
+-- where o.customer_id = c.customer_id
+
+-- select
+-- 	c.customer_id,
+--     c.first_name,
+--     o.order_id
+-- from customers c
+-- join orders o
+-- 	on c.customer_id = o.customer_id
+-- order by customer_id
+-- 对于上面这个查询，结果只会返回满足第84行条件的顾客信息
+-- 缺点就是对于一些没有订单的顾客信息不能查询的到
+-- -----------------------------------------------------------
+-- select
+-- 	c.customer_id,
+--     c.first_name,
+--     o.order_id
+-- from customers c
+-- left outer join，outer可写可不写，就像inner一样
+-- left join orders o  -- 运用左连接left join，不管满不满足第95行的条件，所有customers表的记录都会被返回
+-- 右连接也是同理。。。当然，左表和右表的顺序都是人为规定的。
+-- 	on c.customer_id = o.customer_id
+-- order by customer_id
+
+-- Exercise
+-- select 
+-- 	p.product_id,
+--     p.name,
+--     oi.quantity
+-- from order_items oi
+-- right join products p
+-- 	on oi.product_id = p.product_id
+
+-- select
+-- 	c.customer_id,
+--     c.first_name,
+--     o.order_id,
+--     s.name shipper
+-- from customers c
+-- left join orders o
+-- 	on c.customer_id = o.customer_id
+-- left join shippers s
+-- 	on o.shipper_id = s.shipper_id
+-- order by customer_id
+
+-- Exercise
+-- select
+-- 	o.order_date,
+--     o.order_id,
+--     c.first_name,
+--     s.name as shipper,
+--     os.name as status
+-- from orders o
+-- join customers c
+-- 	on c.customer_id = o.customer_id
+-- left join shippers s
+-- 	on o.shipper_id = s.shipper_id
+-- join order_statuses os
+-- 	on o.status = os.order_status_id
+
+-- select
+-- 	e.employee_id,
+--     e.first_name,
+--     m.first_name as manger
+-- from employees e
+-- left join employees m  -- 这里使用自外连接，返回所有的员工信息，无论有没有对应的管理人员
+-- 	on e.reports_to = m.employee_id
+
+-- select
+-- 	o.order_id,
+--     c.first_name,
+--     s.name as shipper
+-- from orders o
+-- join customers c
+-- 	using (customer_id)  -- 等同于on o.customers_id = c.customers_id
+-- left join shippers s
+-- 	using (shipper_id)  -- 同上，对于相同的列，可以使用using语句
+-- -----------------------------------------------------------------------
+-- select *
+-- from order_items oi
+-- join order_item_notes oin       -- 等同于on oi.order_id = oin oi.order_id and
+-- 	using (order_id, product_id)  --         on.product_id = oin.product_id
+
+-- Exercise
+-- select
+-- 	p.date,
+--     c.name client,
+--     p.amount,
+--     pm.name
+-- from clients c
+-- join payments p
+-- 	using (client_id)
+-- join payment_methods pm
+-- 	on p.payment_method = pm.payment_method_id
+
+-- select
+-- 	o.order_id,
+--     c.first_name
+-- from orders o
+-- natural join customers c  -- 自然连接，让数据库引擎自己猜怎么连接
+-- 无法控制，建议谨慎使用
+
+-- select
+-- 	c.first_name as customer,
+--     p.name as product
+-- from customers c
+-- cross join products p  -- 交叉连接，说白了就是笛卡尔积
+-- 这里用的是显示语法，隐式语法如下：
+-- from customers c, orders o
+-- order by c.first_name
+-- 真正需要交叉连接的实例：
+-- 你有一个型号表，例如小、中、大；还有一个颜色表，比如红、蓝、绿
+-- 想要将所有的型号和颜色进行组合
+
+-- Exercise
+-- select
+-- 	sh.name as shipper, 
+--     p.name as product
+-- from shippers s, products p  -- implicit
+-- from shippers s
+-- cross join products p  -- explicit
+
+-- select
+-- 	order_id,
+--     order_date,
+--     'Active' as status  -- 添加一个字符串文字
+-- from orders
+-- where  order_date >= '2018-09-01'
+-- union  -- 添加union自己，对两段查询进行联合
+-- select
+-- 	order_id,
+--     order_date,
+--     'Archived' as status
+-- from orders
+-- where  order_date <= '2018-09-01'
+-- 在这个案例中，都是基于同一个表格进行查询；接下来请看基于不同表格写查询
+-- ---------------------------------------------------------------------------
+-- select first_name  -- 用union进行联合查询的时候，要保证两个查询的列数相同，否则会报错
+-- from customers
+-- union
+-- select name
+-- from shippers  -- 好吧，这个在现实中根本用不上。
+
+-- Exercise
+-- select customer_id, first_name, points, 'Bronze' as type
+-- from customers
+-- where points < 2000
+-- union
+-- select customer_id, first_name, points, 'Silver' as type
+-- from customers
+-- where points between 2000 and 3000
+-- union
+-- select customer_id, first_name, points, 'Gold' as type
+-- from customers
+-- where points > 3000
+-- order by first_name
